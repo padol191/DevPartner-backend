@@ -13,7 +13,7 @@ const checkObjectId = require("../middleware/checkObjectId");
 router.post(
   "/",
   auth,
-  check("text", "Text is required").notEmpty(),
+  check("title", "title is required").notEmpty(),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -23,15 +23,31 @@ router.post(
     try {
       const user = await User.findById(req.user.id).select("-password");
 
+      const {
+        title,
+        desc,
+        name,
+        stack,
+        // spread the rest of the fields we don't need to check
+        ...rest
+      } = req.body;
+
       const newPost = new Post({
-        text: req.body.text,
+        stack: Array.isArray(stack)
+          ? stack
+          : stack.split(",").map((skill) => " " + skill.trim()),
+        ...rest,
         name: user.name,
         avatar: user.avatar,
-        user: req.user.id,
+        title,
+        desc,
+        admin: req.user.id,
       });
-
+      newPost.users.unshift({ user: req.user.id });
       const post = await newPost.save();
-
+      console.log(User);
+      user.projects.unshift({ post: post.id });
+      const saveduser = await user.save();
       res.json(post);
     } catch (err) {
       console.error(err.message);
