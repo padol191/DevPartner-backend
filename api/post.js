@@ -61,26 +61,25 @@ router.post(
 router.get("/", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    console.log(user)
+    console.log(user);
     const skills = user.skills;
     const posts = await Post.find().sort({ date: -1 });
-    const stacks=[];
+    const stacks = [];
     posts.forEach((post) => {
-      if(post.admin != req.user.id)
-      stacks.push(post);
+      if (post.admin != req.user.id) stacks.push(post);
     });
     let recommendations = [];
-    skills.forEach(skill => {
-      stacks.forEach(stack => {
-        stack.stack.forEach(tech => {
-          if(skill==tech) {
+    skills.forEach((skill) => {
+      stacks.forEach((stack) => {
+        stack.stack.forEach((tech) => {
+          if (skill == tech) {
             recommendations.push(stack);
           }
-        })
-      })
-    })
+        });
+      });
+    });
 
-    let duplicatesRemoved = [...new Set(recommendations)]
+    let duplicatesRemoved = [...new Set(recommendations)];
     console.log(recommendations);
     res.json(duplicatesRemoved);
   } catch (err) {
@@ -257,35 +256,47 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
 // @desc     Add task in kanban
 // @access   Private
 router.post(
-  "/task", 
-  auth, 
-  check("task", "task is required").notEmpty(), 
-  check("projectid", "project id is required").notEmpty(), 
-  check("status", "status is required").notEmpty(), 
+  "/task",
+  auth,
+  [
+    check("task", "task is required").notEmpty(),
+    check("status", "status is required").notEmpty(),
+  ],
   async (req, res) => {
-  const { projectid, task, status } = req.body;
+    const { projectid, task, status } = req.body;
+    const project = await Post.findById(projectid);
+    console.log(project);
+    if (!project) return res.status(404).json({ msg: "Project not found" });
+    if (status == "inprogress") {
+      project.kanban.push({
+        user: req.user.id,
+        task: task,
+        status: status,
+      });
+      const updatedProject = await project.save();
+      return res.status(200).json(updatedProject.kanban);
+    }
+    if (status == "done") {
+      project.forEach((id) => {
+        if (id == projectid) {
+          id.kanban.status = "done";
+        }
+      });
+
+      await project.save();
+      return res.status(200).json(project);
+    }
+  }
+);
+// @route    GET api/posts/
+// @desc     Add task in kanban
+// @access   Private
+router.post("/gettask", auth, async (req, res) => {
+  const { projectid } = req.body;
   const project = await Post.findById(projectid);
-  if(!project) return res.status(404).json({msg: "Project not found"});
-  if(status=="inprogress") {
-    project.kanban.push({
-      user: req.user.id,
-      task: task,
-      status: status 
-    })
-    const updatedProject = await project.save();
-    return res.status(200).json(updatedProject);
-  }
-  if(status=="done") {
-    project.forEach(id => {
-      if(id==projectid) {
-        id.kanban.status = "done";
-      }
-    })
-
-    await project.save();
-    return res.status(200).json(project);
-  }
-})
-
+  if (!project) return res.status(404).json({ msg: "Project not found" });
+  const updatedProject = await project.save();
+  return res.status(200).json(updatedProject.kanban);
+});
 
 module.exports = router;

@@ -6,13 +6,13 @@ const User = require("../models/User");
 
 const multer = require("multer");
 const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public");
-  },
-  filename: (req, file, cb) => {
-    const ext = file.mimetype.split("/")[1];
-    cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`);
-  },
+  // destination: (req, file, cb) => {
+  //   cb(null, "public");
+  // },
+  // filename: (req, file, cb) => {
+  //   const ext = file.mimetype.split("/")[1];
+  //   cb(null, `files/admin-${file.fieldname}-${Date.now()}.${ext}`);
+  // },
 });
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.split("/")[1] === "pdf") {
@@ -34,10 +34,10 @@ router.get("/", auth, async (req, res) => {
     const users = await User.find().select("-password").sort({ date: -1 });
     let recommendations = [];
     users.forEach((user) => {
-      if (id != users.id) {
+      if (id !== user.id) {
         subject.skills.forEach((skill) => {
           user.skills.forEach((comparedUserSkill) => {
-            if (skill == comparedUserSkill) recommendations.push(user);
+            if (skill !== comparedUserSkill) recommendations.push(user);
           });
         });
       }
@@ -100,7 +100,7 @@ router.post(
         stackoverflow,
         linkedin,
         bio,
-        resume: req.file.filename,
+        // resume: req.file.filename,
       };
       console.log(req.user.id);
       let profile = await User.findOneAndUpdate(
