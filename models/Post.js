@@ -37,6 +37,7 @@ const PostSchema = new Schema({
     type: String,
     required: true,
   },
+  files: [String],
   name: {
     type: String,
   },

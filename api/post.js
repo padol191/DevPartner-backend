@@ -299,4 +299,9 @@ router.post("/gettask", auth, async (req, res) => {
   return res.status(200).json(updatedProject.kanban);
 });
 
+router.post("/addFile", auth, async (req, res) => {
+  const file = req.files;
+  console.log(file)
+  return res.json({msg: true})
+})
 module.exports = router;
