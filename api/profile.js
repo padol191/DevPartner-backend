@@ -30,20 +30,18 @@ router.get("/", auth, async (req, res) => {
   try {
     const id = req.user.id;
     const subject = await User.findById(id).select("-password");
-    if(!subject) return res.status(404).json({msg: "User not found."});
+    if (!subject) return res.status(404).json({ msg: "User not found." });
     const users = await User.find().select("-password").sort({ date: -1 });
     let recommendations = [];
-    users.forEach(user => {
-      if(id!=users.id){
-        subject.skills.forEach(skill => {
-          user.skills.forEach(comparedUserSkill => {
-            if(skill==comparedUserSkill) 
-            recommendations.push(user);
-          })
-        })
+    users.forEach((user) => {
+      if (id != users.id) {
+        subject.skills.forEach((skill) => {
+          user.skills.forEach((comparedUserSkill) => {
+            if (skill == comparedUserSkill) recommendations.push(user);
+          });
+        });
       }
-
-    })
+    });
 
     let duplicatesRemoved = [...new Set(recommendations)];
     res.json(duplicatesRemoved);
@@ -52,7 +50,19 @@ router.get("/", auth, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-
+router.get("/post", auth, async (req, res) => {
+  try {
+    const id = req.user.id;
+    const subject = await User.findById(id)
+      .select("-password")
+      .populate("projects.post");
+    if (!subject) return res.status(404).json({ msg: "User not found." });
+    return res.json(subject.projects);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
 // @route    POST api/posts
 // @desc     Create a post
 // @access   Private
@@ -110,16 +120,15 @@ router.post(
 // @desc     Get all posts
 // @access   Private
 router.get("/users/:id", auth, async (req, res) => {
-  try{
-    const id=req.params.id;
+  try {
+    const id = req.params.id;
     const user = await User.findById(id).select("-password");
-    if(!user) return res.status(404).json({msg: "User does not exist"});
+    if (!user) return res.status(404).json({ msg: "User does not exist" });
     return res.status(200).json(user);
-  } catch(err) {
-    console.error(err.message)
+  } catch (err) {
+    console.error(err.message);
     return res.status(500).send("Server Error");
   }
-  
-})
+});
 
 module.exports = router;
