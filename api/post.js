@@ -256,9 +256,35 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
 // @route    POST api/posts/
 // @desc     Add task in kanban
 // @access   Private
-route.post("/task", auth, check("task", "task is required").notEmpty(), check("project id", "project id is required").notEmpty(), (req, res) => {
-  const { projectid, task } = req.body;
-  
+router.post(
+  "/task", 
+  auth, 
+  check("task", "task is required").notEmpty(), 
+  check("projectid", "project id is required").notEmpty(), 
+  check("status", "status is required").notEmpty(), 
+  async (req, res) => {
+  const { projectid, task, status } = req.body;
+  const project = await Post.findById(projectid);
+  if(!project) return res.status(404).json({msg: "Project not found"});
+  if(status=="inprogress") {
+    project.kanban.push({
+      user: req.user.id,
+      task: task,
+      status: status 
+    })
+    const updatedProject = await project.save();
+    return res.status(200).json(updatedProject);
+  }
+  if(status=="done") {
+    project.forEach(id => {
+      if(id==projectid) {
+        id.kanban.status = "done";
+      }
+    })
+
+    await project.save();
+    return res.status(200).json(project);
+  }
 })
 
 
