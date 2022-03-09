@@ -254,5 +254,13 @@ router.delete("/comment/:id/:comment_id", auth, async (req, res) => {
   }
 });
 
+// @route    POST api/posts/
+// @desc     Add task in kanban
+// @access   Private
+route.post("/task", auth, check("task", "task is required").notEmpty(), check("project id", "project id is required").notEmpty(), (req, res) => {
+  const { projectid, task } = req.body;
+  
+})
+
 
 module.exports = router;
