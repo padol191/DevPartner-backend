@@ -31,11 +31,25 @@ const UserSchema = new Schema({
   stackoverflow: {
     type: String,
   },
+  linkedin: {
+    type: String,
+  },
   bio: {
     type: String,
   },
+  projects: [
+    {
+      post: {
+        type: Schema.Types.ObjectId,
+        ref: "post",
+      },
+    },
+  ],
   skills: {
     type: [String],
+  },
+  resume: {
+    type: String,
   },
 });
 

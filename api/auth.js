@@ -7,7 +7,6 @@ const auth = require("../middleware/auth");
 require("dotenv").config();
 const { check, validationResult } = require("express-validator");
 const User = require("../models/User");
-
 router.post(
   "/register",
   check("name", "Name is required").notEmpty(),

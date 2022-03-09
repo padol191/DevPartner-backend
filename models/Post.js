@@ -2,11 +2,24 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const PostSchema = new Schema({
-  user: {
+  users: [
+    {
+      user: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+      },
+    },
+  ],
+  admin: {
     type: Schema.Types.ObjectId,
     ref: "user",
   },
-  text: {
+  stack: [String],
+  title: {
+    type: String,
+    required: true,
+  },
+  desc: {
     type: String,
     required: true,
   },
