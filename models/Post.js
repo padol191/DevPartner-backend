@@ -19,6 +19,32 @@ const PostSchema = new Schema({
     type: String,
     required: true,
   },
+  kanban: {
+    inprogress: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "user",
+        },
+        task: {
+          type: String,
+          required: true,
+        }
+      },
+    ],
+    done: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "user",
+        },
+        task: {
+          type: String,
+          required: true,
+        }
+      },
+    ]
+  },
   desc: {
     type: String,
     required: true,

@@ -28,8 +28,25 @@ const upload = multer({
 
 router.get("/", auth, async (req, res) => {
   try {
+    const id = req.user.id;
+    const subject = await User.findById(id).select("-password");
+    if(!subject) return res.status(404).json({msg: "User not found."});
     const users = await User.find().select("-password").sort({ date: -1 });
-    res.json(users);
+    let recommendations = [];
+    users.forEach(user => {
+      if(id!=users.id){
+        subject.skills.forEach(skill => {
+          user.skills.forEach(comparedUserSkill => {
+            if(skill==comparedUserSkill) 
+            recommendations.push(user);
+          })
+        })
+      }
+
+    })
+
+    let duplicatesRemoved = [...new Set(recommendations)];
+    res.json(duplicatesRemoved);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

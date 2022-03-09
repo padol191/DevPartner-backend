@@ -61,8 +61,29 @@ router.post(
 // @access   Private
 router.get("/", auth, async (req, res) => {
   try {
+    const user = await User.findById(req.user.id);
+    console.log(user)
+    const skills = user.skills;
     const posts = await Post.find().sort({ date: -1 });
-    res.json(posts);
+    const stacks=[];
+    posts.forEach((post) => {
+      if(post.admin != req.user.id)
+      stacks.push(post);
+    });
+    let recommendations = [];
+    skills.forEach(skill => {
+      stacks.forEach(stack => {
+        stack.stack.forEach(tech => {
+          if(skill==tech) {
+            recommendations.push(stack);
+          }
+        })
+      })
+    })
+
+    let duplicatesRemoved = [...new Set(recommendations)]
+    console.log(recommendations);
+    res.json(duplicatesRemoved);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
