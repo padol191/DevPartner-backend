@@ -22,7 +22,7 @@ router.post(
   auth,
   [
     check("github", "GitHub Username is required").notEmpty(),
-    check("bio", "Bio is required").notEmpty(),
+    // check("bio", "Bio is required").notEmpty(),
   ],
   async (req, res) => {
     const errors = validationResult(req);
@@ -67,5 +67,17 @@ router.post(
 // @route    GET api/posts
 // @desc     Get all posts
 // @access   Private
+router.get("/users/:id", auth, async (req, res) => {
+  try{
+    const id=req.params.id;
+    const user = await User.findById(id).select("-password");
+    if(!user) return res.status(404).json({msg: "User does not exist"});
+    return res.status(200).json(user);
+  } catch(err) {
+    console.error(err.message)
+    return res.status(500).send("Server Error");
+  }
+  
+})
 
 module.exports = router;
