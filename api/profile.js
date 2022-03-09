@@ -1,0 +1,71 @@
+const express = require("express");
+const router = express.Router();
+const { check, validationResult } = require("express-validator");
+const auth = require("../middleware/auth");
+const User = require("../models/User");
+
+router.get("/", auth, async (req, res) => {
+  try {
+    const users = await User.find().select("-password").sort({ date: -1 });
+    res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+});
+
+// @route    POST api/posts
+// @desc     Create a post
+// @access   Private
+router.post(
+  "/update",
+  auth,
+  [
+    check("github", "GitHub Username is required").notEmpty(),
+    check("bio", "Bio is required").notEmpty(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    try {
+      const {
+        github,
+        stackoverflow,
+        bio,
+        skills,
+        // spread the rest of the fields we don't need to check
+        ...rest
+      } = req.body;
+
+      const profileFields = {
+        user: req.user.id,
+        skills: Array.isArray(skills)
+          ? skills
+          : skills.split(",").map((skill) => " " + skill.trim()),
+        ...rest,
+        github,
+        stackoverflow,
+        bio,
+      };
+
+      let profile = await User.findOneAndUpdate(
+        { user: req.user.id },
+        { $set: profileFields },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
+      return res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
+    }
+  }
+);
+
+// @route    GET api/posts
+// @desc     Get all posts
+// @access   Private
+
+module.exports = router;

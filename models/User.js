@@ -25,6 +25,18 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  github: {
+    type: String,
+  },
+  stackoverflow: {
+    type: String,
+  },
+  bio: {
+    type: String,
+  },
+  skills: {
+    type: [String],
+  },
 });
 
 module.exports = User = mongoose.model("user", UserSchema);
