@@ -26,7 +26,6 @@ router.post(
       const {
         title,
         desc,
-        name,
         stack,
         // spread the rest of the fields we don't need to check
         ...rest
