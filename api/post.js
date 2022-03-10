@@ -299,9 +299,28 @@ router.post("/gettask", auth, async (req, res) => {
   return res.status(200).json(updatedProject.kanban);
 });
 
-router.post("/addFile", auth, async (req, res) => {
-  const file = req.files;
-  console.log(file)
+router.post("/addFile", async (req, res) => {
+  console.log(req);
+  // const file = req.files.pdf;
+
+
+  // const fileToBase64 = (file, cb) => {
+  //       const reader = new FileReader()
+  //       reader.readAsDataURL(file)
+  //       reader.onload = function () {
+  //         cb(null, reader.result)
+  //       }
+  //       reader.onerror = function (error) {
+  //         cb(error, null)
+  //       }
+  //   }
+
+  // fileToBase64(file, (err, result) => {
+  //     if (result) {
+  //         console.log(result)
+  //     }
+  // })
+  
   return res.json({msg: true})
 })
 module.exports = router;
