@@ -263,9 +263,10 @@ router.post(
     check("status", "status is required").notEmpty(),
   ],
   async (req, res) => {
-    const { projectid, task, status } = req.body;
+    const { projectid, taskid, task, status } = req.body;
+    // console.log(req.body);
     const project = await Post.findById(projectid);
-    console.log(project);
+    // console.log(project);
     if (!project) return res.status(404).json({ msg: "Project not found" });
     if (status == "inprogress") {
       project.kanban.push({
@@ -274,12 +275,15 @@ router.post(
         status: status,
       });
       const updatedProject = await project.save();
+      // console.log(updatedProject);
       return res.status(200).json(updatedProject.kanban);
     }
     if (status == "done") {
-      project.forEach((id) => {
-        if (id == projectid) {
-          id.kanban.status = "done";
+      project.kanban.forEach((id) => {
+        console.log(id._id)
+        if (id._id == taskid) {
+          id.status = "done";
+          // console.log('done')
         }
       });
 
